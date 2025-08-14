@@ -1,0 +1,81 @@
+[[manual:unpriv,RISC-V ISA Manual Volume I: Unprivileged Architecture]]
+= The RISC-V Instruction Set Manual Volume I: Unprivileged Architecture
+include::../docs-resources/global-config.adoc[]
+:description: Unprivileged Architecture
+:colophon:
+:preface-title: Preamble
+:appendix-caption: Appendix
+:imagesdir: ../docs-resources/images
+:title-logo-image: image:risc-v_logo.png["RISC-V International Logo",pdfwidth=3.25in,align=center]
+ifdef::draft-watermark[]
+:page-background-image: image:draft.png[opacity=20%]
+endif::[]
+//:title-page-background-image: none
+//:back-cover-image: image:backpage.png[opacity=25%]
+:back-cover-image: image:riscv-horizontal-color.svg[opacity=25%]
+// Settings:
+:experimental:
+:reproducible:
+:imagesoutdir: {docdir}/../build/images-out
+:bibtex-file: src/resources/riscv-spec.bib
+:bibtex-order: alphabetical
+:bibtex-style: apa
+:bibtex-format: asciidoc
+:bibtex-throw: false
+:icons: font
+:lang: en
+:example-caption: Example
+:listing-caption: Listing
+:sectnums:
+:sectnumlevels: 5
+:toc: left
+:toclevels: 5
+:source-highlighter: rouge
+:table-caption: Table
+:figure-caption: Figure
+:xrefstyle: short
+:chapter-refsig: Chapter
+:section-refsig: Section
+:appendix-refsig: Appendix
+// Uncomment :data-uri: if your eBook reader is not capable of rendering
+// embedded images. One known affected device is PocketBook InkPad 3.
+:data-uri:
+:hide-uri-scheme:
+:stem: latexmath
+:footnote:
+:le: &#8804;
+:ge: &#8805;
+:ne: &#8800;
+:approx: &#8776;
+:inf: &#8734;
+:csrname: envcfg
+:imagesdir: images
+
+_Contributors to all versions of the spec in alphabetical order (please contact editors to suggest
+corrections): Derek Atkins,
+Arvind,
+Krste Asanović,
+Rimas Avižienis,
+Jacob Bachmeyer,
+and Sizhuo Zhang._
+
+_This document is released under a Creative Commons Attribution 4.0 International License._
+
+_This document is a derivative of “The RISC-V Instruction Set Manual, Volume I: User-Level ISA
+Version 2.1” released under the following license: ©2010-2017 Andrew Waterman, Yunsup Lee,
+David Patterson, Krste Asanović. Creative Commons Attribution 4.0 International License.
+Please cite as: “The RISC-V Instruction Set Manual, Volume I: User-Level ISA, Document
+Version 20191214-draft”, Editors Andrew Waterman and Krste Asanović, RISC-V Foundation,
+December 2019._
+
+include::intro.adoc[]
+include::v-st-ext.adoc[]
+//Appendices for Vector
+include::vector-examples.adoc[]
+include::fraclmul.adoc[]
+//End of Vector appendices
+
+include::index.adoc[]
+// this is generated generated from index markers.
+include::bibliography.adoc[]
+// this references the riscv-spec.bi file that has been copied into the resources directory
