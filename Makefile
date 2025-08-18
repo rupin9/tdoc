@@ -14,7 +14,7 @@
 # for generating documentation in various formats (PDF, HTML, EPUB).
 #
 
-DOCS := unpriv
+DOCS := chisel-study
 
 RELEASE_TYPE ?= draft
 
@@ -47,9 +47,9 @@ WORKDIR_TEARDOWN = \
 SRC_DIR := src
 BUILD_DIR := build
 
-DOCS_PDF := $(addprefix $(BUILD_DIR)/, $(addsuffix .pdf, $(DOCS)))
+#DOCS_PDF := $(addprefix $(BUILD_DIR)/, $(addsuffix .pdf, $(DOCS)))
 DOCS_HTML := $(addprefix $(BUILD_DIR)/, $(addsuffix .html, $(DOCS)))
-DOCS_EPUB := $(addprefix $(BUILD_DIR)/, $(addsuffix .epub, $(DOCS)))
+#DOCS_EPUB := $(addprefix $(BUILD_DIR)/, $(addsuffix .epub, $(DOCS)))
 
 ENV := LANG=C.utf8
 XTRA_ADOC_OPTS :=
@@ -77,19 +77,20 @@ REQUIRES := --require=asciidoctor-bibtex \
 
 all: build
 
-build-pdf: $(DOCS_PDF)
+#build-pdf: $(DOCS_PDF)
 build-html: $(DOCS_HTML)
-build-epub: $(DOCS_EPUB)
+#build-epub: $(DOCS_EPUB)
 
-build: build-pdf build-html build-epub
+#build: build-pdf build-html build-epub
+build: build-html
 
 ALL_SRCS := $(wildcard $(SRC_DIR)/*.adoc)
 
-$(BUILD_DIR)/%.pdf: $(SRC_DIR)/%.adoc $(ALL_SRCS)
-	$(WORKDIR_SETUP)
-	$(BUILD_CMD) $(ASCIIDOCTOR_PDF) $(OPTIONS) $(REQUIRES) $<
-	$(WORKDIR_TEARDOWN)
-	@echo -e '\n  Built \e]8;;file://$(abspath $@)\e\\$@\e]8;;\e\\\n'
+#$(BUILD_DIR)/%.pdf: $(SRC_DIR)/%.adoc $(ALL_SRCS)
+#	$(WORKDIR_SETUP)
+#	$(BUILD_CMD) $(ASCIIDOCTOR_PDF) $(OPTIONS) $(REQUIRES) $<
+#	$(WORKDIR_TEARDOWN)
+#	@echo -e '\n  Built \e]8;;file://$(abspath $@)\e\\$@\e]8;;\e\\\n'
 
 $(BUILD_DIR)/%.html: $(SRC_DIR)/%.adoc $(ALL_SRCS)
 	$(WORKDIR_SETUP)
@@ -97,13 +98,17 @@ $(BUILD_DIR)/%.html: $(SRC_DIR)/%.adoc $(ALL_SRCS)
 	$(WORKDIR_TEARDOWN)
 	@echo -e '\n  Built \e]8;;file://$(abspath $@)\e\\$@\e]8;;\e\\\n'
 
-$(BUILD_DIR)/%.epub: $(SRC_DIR)/%.adoc $(ALL_SRCS)
-	$(WORKDIR_SETUP)
-	$(BUILD_CMD) $(ASCIIDOCTOR_EPUB) $(OPTIONS) $(REQUIRES) $<
-	$(WORKDIR_TEARDOWN)
-	@echo -e '\n  Built \e]8;;file://$(abspath $@)\e\\$@\e]8;;\e\\\n'
+#(BUILD_DIR)/%.epub: $(SRC_DIR)/%.adoc $(ALL_SRCS)
+#	$(WORKDIR_SETUP)
+#	$(BUILD_CMD) $(ASCIIDOCTOR_EPUB) $(OPTIONS) $(REQUIRES) $<
+#	$(WORKDIR_TEARDOWN)
+#	@echo -e '\n  Built \e]8;;file://$(abspath $@)\e\\$@\e]8;;\e\\\n'
 
 clean:
 	@echo "Cleaning up generated files..."
 	rm -rf $(BUILD_DIR)
 	@echo "Cleanup completed."
+
+new:
+	$(MAKE) clean
+	$(MAKE)
