@@ -1,9 +1,9 @@
-[[manual:unpriv,RISC-V ISA Manual Volume I: Unprivileged Architecture]]
-= The RISC-V Instruction Set Manual Volume I: Unprivileged Architecture
+[[study:chisel, Chisel study: https://github.com/ucb-bar/chisel-tutorial]]
+= Chisel Study: My Tutorial for Chisel
 include::../docs-resources/global-config.adoc[]
-:description: Unprivileged Architecture
+:description: Chisel Study
 :colophon:
-:preface-title: Preamble
+:preface-title: Preface
 :appendix-caption: Appendix
 :imagesdir: ../docs-resources/images
 :title-logo-image: image:risc-v_logo.png["RISC-V International Logo",pdfwidth=3.25in,align=center]
@@ -51,22 +51,11 @@ endif::[]
 :csrname: envcfg
 :imagesdir: images
 
-_Contributors to all versions of the spec in alphabetical order (please contact editors to suggest
-corrections): Derek Atkins,
-Arvind,
-Krste Asanović,
-Rimas Avižienis,
-Jacob Bachmeyer,
-and Sizhuo Zhang._
+_Soobok Yeo_
 
 _This document is released under a Creative Commons Attribution 4.0 International License._
 
-_This document is a derivative of “The RISC-V Instruction Set Manual, Volume I: User-Level ISA
-Version 2.1” released under the following license: ©2010-2017 Andrew Waterman, Yunsup Lee,
-David Patterson, Krste Asanović. Creative Commons Attribution 4.0 International License.
-Please cite as: “The RISC-V Instruction Set Manual, Volume I: User-Level ISA, Document
-Version 20191214-draft”, Editors Andrew Waterman and Krste Asanović, RISC-V Foundation,
-December 2019._
+_This document is a study note during my exploring chisel (Constructing Hardware in a Scala Embedded Language)_
 
 include::intro.adoc[]
 //include::v-st-ext.adoc[]
