@@ -69,10 +69,10 @@ Version 20191214-draft”, Editors Andrew Waterman and Krste Asanović, RISC-V F
 December 2019._
 
 include::intro.adoc[]
-include::v-st-ext.adoc[]
+//include::v-st-ext.adoc[]
 //Appendices for Vector
-include::vector-examples.adoc[]
-include::fraclmul.adoc[]
+//include::vector-examples.adoc[]
+//include::fraclmul.adoc[]
 //End of Vector appendices
 
 include::index.adoc[]

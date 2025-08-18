@@ -14,7 +14,7 @@
 # for generating documentation in various formats (PDF, HTML, EPUB).
 #
 
-DOCS := riscv-unprivileged
+DOCS := unpriv
 
 RELEASE_TYPE ?= draft
 
