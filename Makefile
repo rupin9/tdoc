@@ -1,4 +1,4 @@
-# Makefile for RISC-V ISA Manuals
+# Makefile for tdoc
 #
 # This work is licensed under the Creative Commons Attribution-ShareAlike 4.0
 # International License. To view a copy of this license, visit
@@ -10,11 +10,11 @@
 # Description:
 #
 # This Makefile is designed to automate the process of building and packaging
-# the documentation for RISC-V ISA Manuals. It supports multiple build targets
+# the documentation. It supports multiple build targets
 # for generating documentation in various formats (PDF, HTML, EPUB).
 #
 
-DOCS := chisel-study
+DOCS := chisel-study.adoc
 
 RELEASE_TYPE ?= draft
 
@@ -31,39 +31,34 @@ else
   $(error Unknown build type; use RELEASE_TYPE={draft, intermediate, official})
 endif
 
-DATE ?= $(shell date +%Y%m%d)
-  BUILD_CMD = \
-      cd $@.workdir &&
-
-WORKDIR_SETUP = \
-    rm -rf $@.workdir && \
-    mkdir -p $@.workdir && \
-    ln -sfn ../../src ../../docs-resources $@.workdir/
-
-WORKDIR_TEARDOWN = \
-    mv $@.workdir/$@ $@ && \
-    rm -rf $@.workdir
+DATE ?= $(shell date +%Y-%m-%d)
+VERSION ?= v0.0.0
 
 SRC_DIR := src
 BUILD_DIR := build
 
 #DOCS_PDF := $(addprefix $(BUILD_DIR)/, $(addsuffix .pdf, $(DOCS)))
-DOCS_HTML := $(addprefix $(BUILD_DIR)/, $(addsuffix .html, $(DOCS)))
+#DOCS_HTML := $(addprefix $(BUILD_DIR)/, $(addsuffix .html, $(DOCS)))
 #DOCS_EPUB := $(addprefix $(BUILD_DIR)/, $(addsuffix .epub, $(DOCS)))
+DOCS_HTML := $(DOCS:%.adoc=%.html)
+DOCS_PDF := $(DOCS:%.adoc=%.pdf)
+DOCS_EPUB := $(DOCS:%.adoc=%.epub)
 
 ENV := LANG=C.utf8
 XTRA_ADOC_OPTS :=
-ASCIIDOCTOR_PDF := $(ENV) asciidoctor-pdf
 ASCIIDOCTOR_HTML := $(ENV) asciidoctor
+ASCIIDOCTOR_PDF := $(ENV) asciidoctor-pdf
 ASCIIDOCTOR_EPUB := $(ENV) asciidoctor-epub3
+
 OPTIONS := --trace \
            -a compress \
            -a mathematical-format=svg \
            -a pdf-fontsdir=docs-resources/fonts \
            -a pdf-theme=docs-resources/themes/riscv-pdf.yml \
            $(WATERMARK_OPT) \
-           -a revnumber='$(DATE)' \
+           -a revnumber='$(VERSION)' \
            -a revremark='$(RELEASE_DESCRIPTION)' \
+           -a revdate=${DATE} \
            $(XTRA_ADOC_OPTS) \
            -D build \
            --failure-level=WARN
@@ -73,36 +68,30 @@ REQUIRES := --require=asciidoctor-bibtex \
             --require=asciidoctor-mathematical \
             --require=asciidoctor-sail
 
-.PHONY: all build clean build-pdf build-html build-epub
+.PHONY: all build clean build-docs
 
 all: build
 
-#build-pdf: $(DOCS_PDF)
-build-html: $(DOCS_HTML)
-#build-epub: $(DOCS_EPUB)
+#build-docs: $(DOCS_HTML) $(DOCS_PDF) $(DOCS_EPUB)
+build-docs: $(DOCS_HTML) $(DOCS_PDF) 
+#build-docs: $(DOCS_HTML)
 
-#build: build-pdf build-html build-epub
-build: build-html
+vpath %.adoc $(SRC_DIR)
+#ALL_SRCS := $(wildcard $(SRC_DIR)/*.adoc)
 
-ALL_SRCS := $(wildcard $(SRC_DIR)/*.adoc)
+%.html: %.adoc
+	$(ASCIIDOCTOR_HTML) $(OPTIONS) $(REQUIRES) $<
 
-#$(BUILD_DIR)/%.pdf: $(SRC_DIR)/%.adoc $(ALL_SRCS)
-#	$(WORKDIR_SETUP)
-#	$(BUILD_CMD) $(ASCIIDOCTOR_PDF) $(OPTIONS) $(REQUIRES) $<
-#	$(WORKDIR_TEARDOWN)
-#	@echo -e '\n  Built \e]8;;file://$(abspath $@)\e\\$@\e]8;;\e\\\n'
+%.pdf: %.adoc
+	$(ASCIIDOCTOR_PDF) $(OPTIONS) $(REQUIRES) $<
 
-$(BUILD_DIR)/%.html: $(SRC_DIR)/%.adoc $(ALL_SRCS)
-	$(WORKDIR_SETUP)
-	$(BUILD_CMD) $(ASCIIDOCTOR_HTML) $(OPTIONS) $(REQUIRES) $<
-	$(WORKDIR_TEARDOWN)
-	@echo -e '\n  Built \e]8;;file://$(abspath $@)\e\\$@\e]8;;\e\\\n'
+%.epub: %.adoc
+	$(ASCIIDOCTOR_EPUB) $(OPTIONS) $(REQUIRES) $<
 
-#(BUILD_DIR)/%.epub: $(SRC_DIR)/%.adoc $(ALL_SRCS)
-#	$(WORKDIR_SETUP)
-#	$(BUILD_CMD) $(ASCIIDOCTOR_EPUB) $(OPTIONS) $(REQUIRES) $<
-#	$(WORKDIR_TEARDOWN)
-#	@echo -e '\n  Built \e]8;;file://$(abspath $@)\e\\$@\e]8;;\e\\\n'
+build:
+	@echo "Starting build..."
+	$(MAKE) build-docs
+	@echo "Build completed successfully."
 
 clean:
 	@echo "Cleaning up generated files..."

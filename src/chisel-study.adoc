@@ -1,7 +1,9 @@
 [[study:chisel, Chisel study: https://github.com/ucb-bar/chisel-tutorial]]
-= Chisel Study: My Tutorial for Chisel
+= My Chisel Study: Exploring Chisel
+Authors: Soobok Yeo
 include::../docs-resources/global-config.adoc[]
-:description: Chisel Study
+:description: My Chisel Study
+:revremark: This document is under development. Expect potential changes. Visit {url-rupin-github} for further details.
 :colophon:
 :preface-title: Preface
 :appendix-caption: Appendix
@@ -17,7 +19,8 @@ endif::[]
 :experimental:
 :reproducible:
 :imagesoutdir: {docdir}/../build/images-out
-:bibtex-file: src/resources/riscv-spec.bib
+:srcdir: src
+:bibtex-file: {srcdir}/riscv-spec.bib
 :bibtex-order: alphabetical
 :bibtex-style: apa
 :bibtex-format: asciidoc
@@ -31,6 +34,7 @@ endif::[]
 :toc: left
 :toclevels: 5
 :source-highlighter: rouge
+//:source-highlighter: pygments
 :table-caption: Table
 :figure-caption: Figure
 :xrefstyle: short
@@ -49,12 +53,8 @@ endif::[]
 :approx: &#8776;
 :inf: &#8734;
 :csrname: envcfg
-:imagesdir: images
-
-_Soobok Yeo_
 
 _This document is released under a Creative Commons Attribution 4.0 International License._
-
 _This document is a study note during my exploring chisel (Constructing Hardware in a Scala Embedded Language)_
 
 include::intro.adoc[]
@@ -67,4 +67,4 @@ include::intro.adoc[]
 include::index.adoc[]
 // this is generated generated from index markers.
 include::bibliography.adoc[]
-// this references the riscv-spec.bi file that has been copied into the resources directory
+// this references the riscv-spec.bib file that has been copied into the resources directory
