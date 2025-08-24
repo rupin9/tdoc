@@ -14,7 +14,14 @@
 # for generating documentation in various formats (PDF, HTML, EPUB).
 #
 
-DOCS := chisel-study.adoc
+TDOC ?= chisel
+DOC_TYPE ?= html
+
+ifeq ($(TDOC), ca)
+  DOCS ?= ca-study.adoc
+else
+  DOCS := chisel-study.adoc
+endif
 
 RELEASE_TYPE ?= draft
 
@@ -32,7 +39,7 @@ else
 endif
 
 DATE ?= $(shell date +%Y-%m-%d)
-VERSION ?= v0.0.0
+VERSION ?= v0.1.0
 
 SRC_DIR := src
 BUILD_DIR := build
@@ -72,9 +79,13 @@ REQUIRES := --require=asciidoctor-bibtex \
 
 all: build
 
-#build-docs: $(DOCS_HTML) $(DOCS_PDF) $(DOCS_EPUB)
+ifeq ($(DOC_TYPE), epub)
+build-docs: $(DOCS_HTML) $(DOCS_PDF) $(DOCS_EPUB)
+else ifeq ($(DOC_TYPE), pdf)
 build-docs: $(DOCS_HTML) $(DOCS_PDF) 
-#build-docs: $(DOCS_HTML)
+else
+build-docs: $(DOCS_HTML)
+endif
 
 vpath %.adoc $(SRC_DIR)
 #ALL_SRCS := $(wildcard $(SRC_DIR)/*.adoc)

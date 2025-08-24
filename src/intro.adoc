@@ -20,6 +20,7 @@ Jupyter 노트북을 통해 Chisel을 실습할 수 있는 환경을 제공합�
 
 
 jdk 설치하기
+image:java-logo.png[Java Logo, width=10%, align=center]
 
 scala 설치하기
 

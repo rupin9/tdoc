@@ -1,8 +1,8 @@
-[[study:chisel, Chisel study: https://github.com/ucb-bar/chisel-tutorial]]
-= My Chisel Study: Constructing Hardware in a Scala Embedded Language
+[[study:ComputerArchitecutre]]
+= My Computer Architecture Study
 Authors: Soobok Yeo
 include::../docs-resources/global-config.adoc[]
-:description: My Chisel Study
+:description: My Computer Architecture Study
 :revremark: This document is under development. Expect potential changes. Visit {url-rupin-github} for further details.
 :colophon:
 :preface-title: Preface
