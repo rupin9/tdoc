@@ -1,5 +1,8 @@
 [[study:chisel, Chisel study: https://github.com/ucb-bar/chisel-tutorial]]
 = My Chisel Study: Constructing Hardware in a Scala Embedded Language
+//:stylesheet: asciidoctor-default.css
+:stylesheet: clean.css
+:stylesdir: ../docs-resources/themes
 Authors: Soobok Yeo
 include::../docs-resources/global-config.adoc[]
 :description: My Chisel Study
@@ -7,6 +10,7 @@ include::../docs-resources/global-config.adoc[]
 :colophon:
 :preface-title: Preface
 :appendix-caption: Appendix
+:exampledir: ../docs-resources/example
 :imagesdir: ../docs-resources/images
 //:title-logo-image: image:risc-v_logo.png["RISC-V International Logo",pdfwidth=3.25in,align=center]
 :title-logo-image: image:chisel_1024.png["CHISEL Logo",pdfwidth=3.25in,align=center]
@@ -30,6 +34,7 @@ endif::[]
 :lang: en
 :example-caption: Example
 :listing-caption: Listing
+:listing-caption: Source
 :sectnums:
 :sectnumlevels: 5
 :toc: left
@@ -59,7 +64,7 @@ _This document is released under a Creative Commons Attribution 4.0 Internationa
 _This document is a study note during my exploring chisel (Constructing Hardware in a Scala Embedded Language)_
 
 include::intro.adoc[]
-//include::v-st-ext.adoc[]
+include::v-st-ext.adoc[]
 //Appendices for Vector
 //include::vector-examples.adoc[]
 //include::fraclmul.adoc[]

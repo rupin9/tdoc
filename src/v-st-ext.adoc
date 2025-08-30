@@ -156,7 +156,7 @@ The `vtype` register has five fields, `vill`, `vma`, `vta`,
 `vsew[2:0]`, and `vlmul[2:0]`.  Bits `vtype[XLEN-2:8]` should be
 written with zero, and non-zero values in this field are reserved.
 
-include::images/wavedrom/vtype-format.edn[]
+include::{imagesdir}/wavedrom/vtype-format.edn[]
 
 NOTE: A small implementation supporting ELEN=32 requires only seven
 bits of state in `vtype`: two bits for `ma` and `ta`, two bits for
@@ -879,11 +879,11 @@ floating-point load/store 12-bit immediate field to provide further
 vector instruction encoding, with bit 25 holding the standard vector
 mask bit (see <<sec-vector-mask-encoding>>).
 
-include::images/wavedrom/vmem-format.edn[]
+include::{imagesdir}/wavedrom/vmem-format.edn[]
 
-include::images/wavedrom/valu-format.edn[]
+include::{imagesdir}/wavedrom/valu-format.edn[]
 
-include::images/wavedrom/vcfg-format.edn[]
+include::{imagesdir}/wavedrom/vcfg-format.edn[]
 
 Vector instructions can have scalar or vector source operands and
 produce scalar or vector results, and most vector instructions can be
@@ -1148,11 +1148,11 @@ their arguments, and write the new value of `vl` into `rd`.
  vsetvl  rd, rs1, rs2      # rd = new vl, rs1 = AVL, rs2 = new vtype value
 ----
 
-include::images/wavedrom/vcfg-format.edn[]
+include::{imagesdir}/wavedrom/vcfg-format.edn[]
 
 ==== `vtype` encoding
 
-include::images/wavedrom/vtype-format.edn[]
+include::{imagesdir}/wavedrom/vtype-format.edn[]
 
 The new `vtype` value is encoded in the immediate fields of `vsetvli`
 and `vsetivli`, and in the `rs2` register for `vsetvl`.
@@ -1350,7 +1350,7 @@ floating-point load/store 12-bit immediate field to provide further
 vector instruction encoding, with bit 25 holding the standard vector
 mask bit (see <<sec-vector-mask-encoding>>).
 
-include::images/wavedrom/vmem-format.edn[]
+include::{imagesdir}/wavedrom/vmem-format.edn[]
 
 [cols="4,12"]
 |===
@@ -1726,28 +1726,43 @@ vle32ff.v   vd, (rs1), vm  #   32-bit unit-stride fault-only-first load
 vle64ff.v   vd, (rs1), vm  #   64-bit unit-stride fault-only-first load
 ----
 
+[source, assembly, linenum]
+.strlen.s
 ----
 strlen example using unit-stride fault-only-first instruction
 
-include::example/strlen.s[lines=4..-1]
+include::{exampledir}/strlen.s[lines=4..-1]
 ----
-
-NOTE: There is a security concern with fault-on-first loads, as they
-can be used to probe for valid effective addresses.  The unit-stride
-versions only allow probing a region immediately contiguous to a known
-region, and so reduce the security impact when used in unprivileged
-code.  However, code running in S-mode can establish arbitrary page
-translations that allow probing of random guest physical addresses
-provided by a hypervisor. Constant-stride and scatter/gather fault-only-first
-instructions are not provided due to lack of encoding space, but they
-can also represent a larger security hole, allowing even unprivileged
-software to easily check multiple random pages for accessibility
-without experiencing a trap.  This standard does not address possible
-security mitigations for fault-only-first instructions.
 
 Even when an exception is not raised, implementations are permitted to process
 fewer than `vl` elements and reduce `vl` accordingly, but if `vstart`=0 and
 `vl`>0, then at least one element must be processed.
+
+[source, scala, linenum]
+.FPU.scala
+----
+abstract class FPUModule(implicit val p: Parameters) extends Module with HasCoreParameters with HasFPUParameters
+
+class FPU(cfg: FPUParams)(implicit p: Parameters) extends FPUModule()(p) {
+  val io = IO(new FPUIO)
+
+  val (useClockGating, useDebugROB) = coreParams match {
+    case r: RocketCoreParams =>
+      val sz = if (r.debugROB.isDefined) r.debugROB.get.size else 1
+      (r.clockGate, sz < 1)
+    case _ => (false, false)
+  }
+  val clock_en_reg = Reg(Bool())
+  val clock_en = clock_en_reg || io.cp_req.valid
+  val gated_clock =
+    if (!useClockGating) clock
+    else ClockGate(clock, clock_en, "fpu_clock_gate")
+
+  val fp_decoder = Module(new FPUDecoder)
+  fp_decoder.io.inst := io.inst
+  val id_ctrl = WireInit(fp_decoder.io.sigs)
+}
+----
 
 When the fault-only-first instruction takes a trap due to an
 interrupt, implementations should not reduce `vl` and should instead
@@ -2176,7 +2191,7 @@ The vector arithmetic instructions use a new major opcode (OP-V =
 1010111~2~) which neighbors OP-FP.  The three-bit `funct3` field is
 used to define sub-categories of vector instructions.
 
-include::images/wavedrom/valu-format.edn[]
+include::{imagesdir}/wavedrom/valu-format.edn[]
 
 [[sec-arithmetic-encoding]]
 ==== Vector Arithmetic Instruction encoding
@@ -3465,7 +3480,7 @@ The following table gives the seven MSBs of the output significand as a
 function of the LSB of the normalized input exponent and the six MSBs of the
 normalized input significand; the other bits of the output significand are zero.
 
-include::images/wavedrom/vfrsqrt7.edn[]
+include::{imagesdir}/wavedrom/vfrsqrt7.edn[]
 
 NOTE: For example, when SEW=32, vfrsqrt7(0x00718abc ({approx} 1.043e-38)) = 0x5f080000 ({approx} 9.800e18), and vfrsqrt7(0x7f765432 ({approx} 3.274e38)) = 0x1f820000 ({approx} 5.506e-20).
 
@@ -3552,7 +3567,7 @@ The following table gives the seven MSBs of the normalized output significand
 as a function of the seven MSBs of the normalized input significand; the other
 bits of the normalized output significand are zero.
 
-include::images/wavedrom/vfrec7.edn[]
+include::{imagesdir}/wavedrom/vfrec7.edn[]
 
 If the normalized output exponent is 0 or -1, the result is subnormal: the
 output exponent is 0, and the output significand is given by concatenating
@@ -4308,10 +4323,10 @@ and, if masked, cannot overlap the mask register ('v0').
 The following is an example of vectorizing a data-dependent exit loop.
 
 ----
-include::example/strcpy.s[lines=4..-1]
+include::{exampledir}/strcpy.s[lines=4..-1]
 ----
 ----
-include::example/strncpy.s[lines=4..-1]
+include::{exampledir}/strncpy.s[lines=4..-1]
 ----
 
 ==== Vector Iota Instruction
@@ -5291,7 +5306,7 @@ even though the EEW settings differ by a factor of 4.
 Each source and destination operand to a vector instruction may have a
 different element group size, different EMUL, and/or different EEW.
 
-==== Element Group Width
+==== Element Group Widthcd
 
 The _element_ _group_ _width_ (EGW) is the number of bits in the
 element group as a whole.
@@ -5323,4 +5338,4 @@ the mask element group is set).
 
 === Vector Instruction Listing
 
-include::images/wavedrom/v-inst-table.edn[]
+include::{imagesdir}/wavedrom/v-inst-table.edn[]

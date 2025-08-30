@@ -15,7 +15,7 @@
 #
 
 TDOC ?= chisel
-DOC_TYPE ?= html
+DT ?= html
 
 ifeq ($(TDOC), ca)
   DOCS ?= ca-study.adoc
@@ -79,9 +79,9 @@ REQUIRES := --require=asciidoctor-bibtex \
 
 all: build
 
-ifeq ($(DOC_TYPE), epub)
+ifeq ($(DT), epub)
 build-docs: $(DOCS_HTML) $(DOCS_PDF) $(DOCS_EPUB)
-else ifeq ($(DOC_TYPE), pdf)
+else ifeq ($(DT), pdf)
 build-docs: $(DOCS_HTML) $(DOCS_PDF) 
 else
 build-docs: $(DOCS_HTML)
@@ -109,6 +109,5 @@ clean:
 	rm -rf $(BUILD_DIR)
 	@echo "Cleanup completed."
 
-new:
-	$(MAKE) clean
+new: clean
 	$(MAKE)
