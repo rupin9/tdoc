@@ -2,6 +2,7 @@
 = My Chisel Study: Constructing Hardware in a Scala Embedded Language
 //:stylesheet: asciidoctor-default.css
 :stylesheet: clean.css
+//:linkcss:
 :stylesdir: ../docs-resources/themes
 Authors: Soobok Yeo
 include::../docs-resources/global-config.adoc[]
@@ -63,8 +64,8 @@ endif::[]
 _This document is released under a Creative Commons Attribution 4.0 International License._
 _This document is a study note during my exploring chisel (Constructing Hardware in a Scala Embedded Language)_
 
-include::intro.adoc[]
-include::v-st-ext.adoc[]
+include::chisel-intro.adoc[]
+include::chisel-basics.adoc[]
 //Appendices for Vector
 //include::vector-examples.adoc[]
 //include::fraclmul.adoc[]

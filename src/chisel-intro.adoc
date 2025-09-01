@@ -1,0 +1,30 @@
+== Introduction
+
+
+Chisel (Constructing Hardware in a Scala Embedded Language) 을 사용하여 
+하드웨어를 설계하는 방법을 배우는 문서입니다. 이 문서는 Chisel의 기본 개념과 사용법을 소개하며, 
+다양한 예제를 통해 실습할 수 있도록 구성되어 있습니다.
+
+스터디를 위해서, https://github.com/chipsalliance/chisel/[chisel github] 를 참고하지만, 세부적으로 다음을 참고합니다.
+
+* https://mybinder.org/v2/gh/freechipsproject/chisel-bootcamp/master[Chisel Bootcamp] +
+Jupyter 노트북을 통해 Chisel을 실습할 수 있는 환경을 제공합니다.
+* https://github.com/ucb-bar/chisel-tutorial[Chisel 튜토리얼] +
+여러가지 다양한 예제를 제공하는 Chisel 튜토리얼입니다. 다음의 위키 페이지 내용을 참고합니다.
+** https://github.com/ucb-bar/chisel-tutorial/wiki[Chisel Tutorial Wiki]
+* https://www.chisel-lang.org/docs/cookbooks[Chisel Cookbook] +
+여기에서, 자주 사용되는 설계 패턴등을 확인하고, 배울 수 있습니다.
+(((bootcamp, cookbook)))
+(((tutorial)))
+
+=== Chisel 설치하기
+
+https://www.chisel-lang.org/docs/installation[Chisel 설치 가이드]를 참고하여, Chisel 개발 환경을 설정합니다.
+chisel 개발 환경을 설정하기 위해서는, 다음의 소프트웨어를 설치해야 합니다.
+
+* Java Development Kit (JDK) 8 이상
+* Scala 2.12 이상
+* SBT (Scala Build Tool) 1.3 이상
+* firtools (optional, for Verilator backend)
+* Verilator (optional, for Verilator backend)
+

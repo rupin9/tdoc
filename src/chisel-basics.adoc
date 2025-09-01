@@ -1,0 +1,164 @@
+[[chiselbasics]]
+== Chisel Basics
+
+chisel-tutorial directory structure는 아래의 <<fig:chisel-tutorial-structure>>와 같다.
+
+[[fig:chisel-tutorial-structure]]
+[ditaa,float="center"]
+.Chisel-tutorial directory structure
+----
+.
+├── doc
+│   ├── style
+│   └── tutorial
+│       └── figs
+├── project
+└── src
+    ├── main
+    │   └── scala
+    │       ├── examples
+    │       ├── hello
+    │       ├── problems
+    │       └── solutions
+    └── test
+        ├── resources
+        └── scala
+            ├── examples
+            ├── problems
+            ├── solutions
+            └── utils
+----
+
+<<fig:chisel-tutorial-structure>>에서 보는 바와 같이, examples, problems, solutions 디렉토리가 각각 main과 test에 존재한다.
+
+=== Implementation of the 1st Chisel Code
+
+GCD.scala 예제를 실행을 통하여, chisel-tutorial 의 전반적인 활용에 대해서 간단히 알아본다.
+
+[source,scala,linenums]
+.GDC.scala
+----
+package examples
+import chisel3._
+
+class GCD extends Module {
+  val io = IO(new Bundle {
+    val a     = Input(UInt(16.W))
+    val b     = Input(UInt(16.W))
+    val load  = Input(Bool())
+    val out   = Output(UInt(16.W))
+    val valid = Output(Bool())
+  })
+  val x = Reg(UInt())
+  val y = Reg(UInt())
+
+  when (io.load) {
+    x := io.a; y := io.b
+  } .otherwise {
+    when (x > y) {
+      x := x - y
+    } .elsewhen (x <= y) {
+      y := y - x
+    }
+  }
+
+  io.out := x
+  io.valid := y === 0.U
+}
+----
+
+import chisel3._ 선언은 chisel3 라이브러리를 사용하겠다는 선언이다.
+그 이후에 HW 모듈을 정의하는 class GCD extends Module { ... } 가 나온다.
+Module은 chisel3 라이브러리에서 제공하는 추상 클래스이다.
+즉, GCD 클래스는 Module 클래스를 상속받아, HW 모듈을 정의한다.
+HW 모듈은 입출력 포트와 내부 레지스터, 그리고 동작을 정의한다.
+
+입출력 포트는 val io = IO(new Bundle{...}) 라는 이름의 Bundle 객체로 정의된다.
+Bundle 객체는 여러 개의 포트를 묶어서 하나의 객체로 만들 수 있다.
+입출력 포트는 Input, Output, 그리고 Bool, UInt 등의 데이터 타입으로 정의된다.
+
+내부 레지스터는 Reg 객체로 정의된다.
+동작은 when, .elsewhen, .otherwise 등의 제어문으로 정의되는데, HW적으로는 멀티플렉서(mux)로 구현된다.
+이러한 제어문에서 발생하는 레지스터 할당은 := 연산자로 이루어지는데, 
+HW적으로는 always @ (posedge clk) 를 사용하여, non-blocking assignment로 구현된다.
+
+마지막으로, io.out 과 io.valid 포트에 값을 할당한다.
+io.out 포트에는 x 레지스터의 값을 할당하고, io.valid 포트에는 y 레지스터가 0인지 여부를 할당한다.
+참고로, x, y 레지스터는 각각 16비트의 unsigned integer로 chisel에 의해 암묵적으로 유추된다.
+
+=== Running the 1st Chisel Code
+
+구현된 GCD 모듈을 실행하기 위해서는, chisel tester 라이브러리와 firrtl을 활용한다.
+`src/test/scala/examples/` 디렉토리에 GCDTests.scala 파일을 두고, test 코드를 작성한다(튜토리얼에 이미 준비되어 있다).
+
+[[src:gcd-tests-scala]]
+[source,scala,linenums]
+.GCDTests.scala
+----
+package examples
+
+import chisel3.iotesters.{ChiselFlatSpec, Driver, PeekPokeTester}
+
+class GCDTests(c: GCD) extends PeekPokeTester(c) {
+  val inputs = List( (48, 32), (7, 3), (100, 10) )
+  val outputs = List( 16, 1, 10)
+
+  var i = 0
+  do {
+    poke(c.io.a, inputs(i)._1)
+    poke(c.io.b, inputs(i)._2)
+
+    poke(c.io.load, 1)
+    step(1)
+    poke(c.io.load, 0)
+
+    var ready = false
+
+    do {
+      ready = peek(c.io.valid) == 1
+      step(1)
+    } while (t < 100 && ! ready)
+
+    expect(c.io.out, outputs(i))
+    i += 1
+  } while (t < 100 && i < 3)
+
+  if (t >= 100) fail
+}
+
+class GCDTester extends ChiselFlatSpec {
+  behavior of "GCD"
+
+  backends foreach {backend =>
+    it should s"test the basic gcd circuit" in {
+      Driver(() => new GCD, backend)((c) => new GCDTests(c)) should be (true)
+    }
+  }
+}
+----
+
+<<src:gcd-tests-scala>>를 참조하면, 크게 [Module Name]Tests 클래스와 [Module Name]Tester 클래스
+2개로 구현된다. Tests 클래스에는 PeekPokeTester를 상속받아, 실제 테스트 벡터를 적용하고, 결과를 검증하는 코드를 작성한다.
+Tester 클래스에는 ChiselFlatSpec을 상속받아, 테스트를 실행하는 코드를 작성한다.
+Tester 클래스의 it should ... in { ... } 블록 안에서, Driver 함수를 호출하여, 테스트를 실행한다.
+Driver 함수는 첫 번째 인자로 GCD 모듈을 생성하는 함수를 받고,
+두 번째 인자로 GCDTests 클래스를 생성하는 함수를 받는다.
+Driver 함수는 테스트가 성공하면 true, 실패하면 false를 반환한다.
+
+[source,bash,linenums]
+----
+[info] running examples.Launcher GCD
+Starting tutorial GCD
+[info] [0.011] Elaborating design...
+[info] [3.175] Done elaborating.
+Computed transform order in: 1468.1 ms
+Total FIRRTL Compile Time: 2826.8 ms
+file loaded in 0.189982079 seconds, 21 symbols, 16 statements
+[info] [0.002] SEED 1756746010944
+test GCD Success: 3 tests passed in 29 cycles in 0.053474 seconds 542.32 Hz
+[info] [0.019] RAN 24 CYCLES PASSED
+Tutorials passing: 1
+[success] Total time: 132 s (0:02:12.0), completed Sep 2, 2025, 2:00:21 AM
+----
+
+위의 실행 결과에서 보는 바와 같이, 3개의 테스트 벡터가 모두 성공하였다.
