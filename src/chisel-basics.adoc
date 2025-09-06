@@ -2,12 +2,14 @@
 == Chisel Basics
 
 chisel-tutorial directory structure는 아래의 <<fig:chisel-tutorial-structure>>와 같다.
+그림에서 보는 바와 같이, src디렉토리 아래에 main과 test에 존재하며, 
+examples, problems, solutions 디렉토리가 각각 pair로 있다.
 
 [[fig:chisel-tutorial-structure]]
 [ditaa,float="center"]
 .Chisel-tutorial directory structure
 ----
-.
+.[root directory]
 ├── doc
 │   ├── style
 │   └── tutorial
@@ -28,8 +30,6 @@ chisel-tutorial directory structure는 아래의 <<fig:chisel-tutorial-structure
             ├── solutions
             └── utils
 ----
-
-<<fig:chisel-tutorial-structure>>에서 보는 바와 같이, examples, problems, solutions 디렉토리가 각각 main과 test에 존재한다.
 
 === Implementation of the 1st Chisel Code
 
@@ -67,7 +67,7 @@ class GCD extends Module {
 }
 ----
 
-import chisel3._ 선언은 chisel3 라이브러리를 사용하겠다는 선언이다.
+[.rfont]#import chisel3._# 선언은 chisel3 라이브러리를 사용하겠다는 선언이다.
 그 이후에 HW 모듈을 정의하는 class GCD extends Module { ... } 가 나온다.
 Module은 chisel3 라이브러리에서 제공하는 추상 클래스이다.
 즉, GCD 클래스는 Module 클래스를 상속받아, HW 모듈을 정의한다.
@@ -77,10 +77,84 @@ HW 모듈은 입출력 포트와 내부 레지스터, 그리고 동작을 정의
 Bundle 객체는 여러 개의 포트를 묶어서 하나의 객체로 만들 수 있다.
 입출력 포트는 Input, Output, 그리고 Bool, UInt 등의 데이터 타입으로 정의된다.
 
-내부 레지스터는 Reg 객체로 정의된다.
-동작은 when, .elsewhen, .otherwise 등의 제어문으로 정의되는데, HW적으로는 멀티플렉서(mux)로 구현된다.
-이러한 제어문에서 발생하는 레지스터 할당은 := 연산자로 이루어지는데, 
+[NOTE]
+====
+IO 객체의 정의는 chisel3 라이브러리의 내부 API로서 다음과 같이 설명되어 있다.
+```scala
+// IO object must wrap the datatype used to set the io field of any Module.
+// i.e. All concrete modules must have defined io in this form:
+[lazy] val io[: io type] = IO(...[: io type])
+```
+====
+
+내부 레지스터는 Reg 객체로 정의된다. 필요에 따라서, RegInit 객체로 초기값을 지정할 수도 있다.
+또한, RegNext 객체로 1사이클의 지연후에 값을 저장할 수도 있다.
+동작은 when, .elsewhen, .otherwise 등의 제어문으로 정의되는데, 
+이러한 동작은 HW적으로는 멀티플렉서(mux)로 구현된다.
+제어문에서 발생하는 레지스터 할당은 := 연산자로 이루어지는데, 
 HW적으로는 always @ (posedge clk) 를 사용하여, non-blocking assignment로 구현된다.
+
+[NOTE]
+====
+Reg 객체의 정의는 chisel3 라이브러리의 내부 API이며, 특히, width가 지정되지 않은 경우에는 
+FIRRTL compiler에 의해 유추 (inferred) 된다는 점이 중요하다. 몇 가지 예를 들면 다음과 같다.
+
+* Reg(): Utility for constructing hardware registers
+```scala
+// Reg 객체의 width 지정 예
+val r0 = Reg(UInt())    // width is inferred
+val r1 = Reg(UInt(8.W)) // width is set to 8
+
+// Reg(Bundle) 객체의 width 지정 예
+class MyBundle {
+  val unknown = UInt()
+  val known   = UInt(8.W)
+}
+val r4 = Reg(new MyBundle)
+// Width of r4.unknown is inferred
+// Width of r4.known is set to 8
+```
+* RegNext(): Utility for constructing one-cycle delayed versions of signals
+```scala
+// Reg 객체의 width 지정 예
+val foo = Reg(UInt(4.W))         // width is 4
+val bar = RegNext(foo)           // width is unset till be inferred by the firrtl compiler.
+
+// 만약, 명시적으로 width를 지정하고자 한다면, 다음과 같이 chiselTypeOf() 함수를 사용한다.
+val foo = Reg(UInt(4.W))         // width is 4
+val bar = Reg(chiselTypeOf(foo)) // width is 4
+bar := foo
+
+// Reg(Bundle) 객체의 width 지정 예 (width set of aggregate is inferred, when not specified)
+class MyBundle extends Bundle {
+  val x = UInt(4.W)
+}
+val foo = Wire(new MyBundle)     // the width of foo.x is 4
+val bar = RegNext(foo)           // the width of bar.x is 4
+```
+* RegInit(): Utility for constructing hardware registers with an initialization value.
+```scala
+// 1. Literal Bits (값) initializer: width will be set to match
+val r1 = RegInit(1.U)       // width will be inferred to be 1
+val r2 = RegInit(1.U(8.W))  // width is set to 8
+
+// 2. Non-Literal Element (원소) initializer - width will be inferred
+val x = Wire(UInt())
+val y = Wire(UInt(8.W))
+val r1 = RegInit(x) // width will be inferred
+val r2 = RegInit(y) // width is set to 8
+
+// 3. Aggregate initializer - width will be set to match the aggregate
+class MyBundle extends Bundle {
+  val unknown = UInt()
+  val known   = UInt(8.W)
+}
+val w1 = Reg(new MyBundle)
+val w2 = RegInit(w1)
+// Width of w2.unknown is inferred
+// Width of w2.known is set to 8
+```
+====
 
 마지막으로, io.out 과 io.valid 포트에 값을 할당한다.
 io.out 포트에는 x 레지스터의 값을 할당하고, io.valid 포트에는 y 레지스터가 0인지 여부를 할당한다.
@@ -137,13 +211,15 @@ class GCDTester extends ChiselFlatSpec {
 }
 ----
 
-<<src:gcd-tests-scala>>를 참조하면, 크게 [Module Name]Tests 클래스와 [Module Name]Tester 클래스
+<<src:gcd-tests-scala>>를 참조하면, 크게 ModuleName[#Tests#] 클래스와 ModuleName[#Tester#] 클래스
 2개로 구현된다. Tests 클래스에는 PeekPokeTester를 상속받아, 실제 테스트 벡터를 적용하고, 결과를 검증하는 코드를 작성한다.
 Tester 클래스에는 ChiselFlatSpec을 상속받아, 테스트를 실행하는 코드를 작성한다.
 Tester 클래스의 it should ... in { ... } 블록 안에서, Driver 함수를 호출하여, 테스트를 실행한다.
-Driver 함수는 첫 번째 인자로 GCD 모듈을 생성하는 함수를 받고,
-두 번째 인자로 GCDTests 클래스를 생성하는 함수를 받는다.
-Driver 함수는 테스트가 성공하면 true, 실패하면 false를 반환한다.
+Driver 함수는 첫 번째 인자로 test 대상 (여기서는 GCD) 이 되는 모듈(T <: MultiIOModule)을 받고,
+두 번째 인자로 PeekPokeTester[T] 받아서, 동작하게 된다. Driver 함수는 테스트가 성공하면 true, 실패하면 false를 반환한다.
+
+실행은 프롬프트에서 다음과 같이 sbt 명령어로 실행한다.
+./run-examples.sh GCD
 
 [source,bash,linenums]
 ----

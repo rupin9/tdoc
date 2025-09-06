@@ -1,9 +1,9 @@
 [[study:chisel, Chisel study: https://github.com/ucb-bar/chisel-tutorial]]
 = My Chisel Study: Constructing Hardware in a Scala Embedded Language
-//:stylesheet: asciidoctor-default.css
-:stylesheet: clean.css
-//:linkcss:
 :stylesdir: ../docs-resources/themes
+//:stylesheet: asciidoctor-default.css
+:stylesheet: my-asciidoctor.css
+//:linkcss:
 Authors: Soobok Yeo
 include::../docs-resources/global-config.adoc[]
 :description: My Chisel Study

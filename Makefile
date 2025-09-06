@@ -27,13 +27,13 @@ RELEASE_TYPE ?= draft
 
 ifeq ($(RELEASE_TYPE), draft)
   WATERMARK_OPT := -a draft-watermark
-  RELEASE_DESCRIPTION := DRAFT---NOT AN OFFICIAL RELEASE
+  REVMARK := DRAFT---NOT AN OFFICIAL RELEASE
 else ifeq ($(RELEASE_TYPE), intermediate)
   WATERMARK_OPT :=
-  RELEASE_DESCRIPTION := Intermediate Release
+  REVMARK := Intermediate Release
 else ifeq ($(RELEASE_TYPE), official)
   WATERMARK_OPT :=
-  RELEASE_DESCRIPTION := Official Release
+  REVMARK := Official Release
 else
   $(error Unknown build type; use RELEASE_TYPE={draft, intermediate, official})
 endif
@@ -64,8 +64,9 @@ OPTIONS := --trace \
            -a pdf-theme=docs-resources/themes/riscv-pdf.yml \
            $(WATERMARK_OPT) \
            -a revnumber='$(VERSION)' \
-           -a revremark='$(RELEASE_DESCRIPTION)' \
+           -a revremark='$(REVMARK)' \
            -a revdate=${DATE} \
+           -a docinfo=shared \
            $(XTRA_ADOC_OPTS) \
            -D build \
            --failure-level=WARN
