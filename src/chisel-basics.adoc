@@ -6,8 +6,8 @@ chisel-tutorial directory structure는 아래의 <<fig:chisel-tutorial-structure
 examples, problems, solutions 디렉토리가 각각 pair로 있다.
 
 [[fig:chisel-tutorial-structure]]
-[ditaa,float="center"]
 .Chisel-tutorial directory structure
+[ditaa,float="center"]
 ----
 .[root directory]
 ├── doc
@@ -35,8 +35,8 @@ examples, problems, solutions 디렉토리가 각각 pair로 있다.
 
 GCD.scala 예제를 실행을 통하여, chisel-tutorial 의 전반적인 활용에 대해서 간단히 알아본다.
 
-[source,scala,linenums]
 .GDC.scala
+[source,%nowrap,scala,linenums]
 ----
 package examples
 import chisel3._
@@ -166,8 +166,8 @@ io.out 포트에는 x 레지스터의 값을 할당하고, io.valid 포트에는
 `src/test/scala/examples/` 디렉토리에 GCDTests.scala 파일을 두고, test 코드를 작성한다(튜토리얼에 이미 준비되어 있다).
 
 [[src:gcd-tests-scala]]
-[source,scala,linenums]
 .GCDTests.scala
+[source,%nowrap,scala,linenums]
 ----
 package examples
 
@@ -211,18 +211,21 @@ class GCDTester extends ChiselFlatSpec {
 }
 ----
 
-<<src:gcd-tests-scala>>를 참조하면, 크게 ModuleName[#Tests#] 클래스와 ModuleName[#Tester#] 클래스
+<<src:gcd-tests-scala>>를 참조하면, 크게 [ModuleName][.bfont]#Tests# 클래스와 [ModuleName][.bfont]#Tester# 클래스
 2개로 구현된다. Tests 클래스에는 PeekPokeTester를 상속받아, 실제 테스트 벡터를 적용하고, 결과를 검증하는 코드를 작성한다.
 Tester 클래스에는 ChiselFlatSpec을 상속받아, 테스트를 실행하는 코드를 작성한다.
 Tester 클래스의 it should ... in { ... } 블록 안에서, Driver 함수를 호출하여, 테스트를 실행한다.
-Driver 함수는 첫 번째 인자로 test 대상 (여기서는 GCD) 이 되는 모듈(T <: MultiIOModule)을 받고,
+Driver 함수는 첫 번째 인자로 test 대상 (여기서는 GCD) 이 되는 Module[T <: MultiIOModule]을 받고,
 두 번째 인자로 PeekPokeTester[T] 받아서, 동작하게 된다. Driver 함수는 테스트가 성공하면 true, 실패하면 false를 반환한다.
 
 실행은 프롬프트에서 다음과 같이 sbt 명령어로 실행한다.
-./run-examples.sh GCD
 
-[source,bash,linenums]
+[[src:run-gcd-bash]]
+.Running GCD
+[source,%nowrap,bash,linenums]
 ----
+$ sbt -v "test:runMain examples.Launcher GCD"
+... 중략 ...
 [info] running examples.Launcher GCD
 Starting tutorial GCD
 [info] [0.011] Elaborating design...
@@ -230,11 +233,136 @@ Starting tutorial GCD
 Computed transform order in: 1468.1 ms
 Total FIRRTL Compile Time: 2826.8 ms
 file loaded in 0.189982079 seconds, 21 symbols, 16 statements
-[info] [0.002] SEED 1756746010944
-test GCD Success: 3 tests passed in 29 cycles in 0.053474 seconds 542.32 Hz
+[info] [0.002] SEED 175674601 n 29 cycles in 0.053474 seconds 542.32 Hz
 [info] [0.019] RAN 24 CYCLES PASSED
 Tutorials passing: 1
 [success] Total time: 132 s (0:02:12.0), completed Sep 2, 2025, 2:00:21 AM
 ----
 
-위의 실행 결과에서 보는 바와 같이, 3개의 테스트 벡터가 모두 성공하였다.
+위의 실행 결과에서 보는 바와 같이, 테스트 벡터의 입력 List( (48, 32), (7, 3), (100, 10) )에 대한
+출력 결과가 성공하였다. 실행 스크립트인 `sbt -v "test:runMain examples.Launcher GCD"`을 좀 더 살펴보면,
+test:runMain 은 sbt의 기본 명령어로서, test 스코프에 있는 (src/test/scala 디렉토리에 있는 파일들) 
+함수 호출을 위해서는 examples 패키지의 Launcher 객체의 main 함수를 호출한다는 의미입니다.
+<<src:launcher-scala>>를 참조하면, Launcher 객체의 main 함수는 TutorialRunner 객체의 apply 함수를 호출합니다.
+TutorialRunner 객체의 apply 함수는 첫 번째 인자로 섹션 이름 (여기서는 examples), 
+두 번째 인자로 튜토리얼 맵 (여기서는 examples 맵), 세 번째 인자로 커맨드 라인 인자 (여기서는 GCD)를 받습니다.
+
+[[src:launcher-scala]]
+.Launcher.scala and TutorialRunner.scala
+[source,%nowrap,scala,linenums]
+----
+// @chisel-tutorial/src/test/scala/examples/Launcher.scala
+package examples
+
+import chisel3.iotesters.{Driver, TesterOptionsManager}
+import utils.TutorialRunner
+
+object Launcher {
+  val examples = Map(
+      ...
+      "GCD" -> { (manager: TesterOptionsManager) =>
+        Driver.execute(() => new GCD, manager) {
+          (c) => new GCDTests(c)
+        }
+      },
+      ...
+  )
+  def main(args: Array[String]): Unit = {
+    TutorialRunner("examples", examples, args)
+  }
+}
+
+// @chisel-tutorial/src/test/scala/utils/TutorialRunner.scala
+package utils
+
+import scala.collection.mutable.ArrayBuffer
+import chisel3.iotesters._
+
+object OptionsCopy {
+  def apply(t: TesterOptionsManager): TesterOptionsManager = {
+    new TesterOptionsManager {
+      testerOptions = t.testerOptions.copy()
+      interpreterOptions = t.interpreterOptions.copy()
+      chiselOptions = t.chiselOptions.copy()
+      firrtlOptions = t.firrtlOptions.copy()
+      treadleOptions = t.treadleOptions.copy()
+    }
+  }
+}
+
+object TutorialRunner {
+  def apply(section: String, 
+            tutorialMap: Map[String, TesterOptionsManager => Boolean], 
+            args: Array[String]): Unit = {
+
+    ...
+    testOptionsManager.setTargetDirName(s"test_run_dir/$section/$testName")
+    ...
+
+    if(successful > 0) {
+      println(s"Tutorials passing: $successful")
+    }
+    if(errors.nonEmpty) {
+      println(s"Errors: ${errors.length}: in the following tutorials")
+      System.exit(1)
+    }
+  }
+}
+----
+
+sbt에서 test:runMain을 실행했을 때 src/main/example 디렉토리의 GCD 객체도 함께 컴파일되됩니다.
+이것은 sbt의 자동 의존성 관리에 의해서 이루어 집니다.
+
+Scope analysis and dependency check:::
+  스코프 분석: sbt는 test:runMain 명령어를 보고 Test 스코프 내의 코드를 실행해야 한다는 것을 파악합니다.
+  의존성 파악: sbt는 test 스코프의 클래스(examples.Launcher)가 compile 스코프에 있는 GCD와 같은 다른 클래스에 의존하고 있다는 것을 자동으로 분석합니다.
+
+Run compile chain:::
+  sbt는 runMain을 실행하기 전에 test 스코프의 모든 의존성을 컴파일합니다.
+  이때 test 스코프는 compile 스코프의 코드를 포함하므로, sbt는 src/main/example 디렉토리에 있는 GCD와 같은 compile 스코프의 코드를 먼저 컴파일합니다.
+  test 스코프의 코드가 compile 스코프의 코드에 의존하므로, sbt는 compile 스코프가 먼저 컴파일되고 그 결과가 test 스코프에 사용될 수 있도록 보장합니다.
+
+=== Generate Verilog and VCD
+
+기본적으로 테스트 결과는 <<src:run-gcd-bash>> 에 보이는 것처럼 콘솔 화면에 보여주지만,
+TutorialRunner는 빌드의 결과물인 .fir 파일과 .v 파일을 생성하여 test_run_dir에 저장합니다.
+즉, Verilog 파일이 `test_run_dir/examples/GCD/GCD.v`에 생성되고, 같은 디렉토리에
+GCD.fir`에 생성됩니다.
+
+Verilog 파일과 더불어 VCD (Value Change Dump) 파일도 생성할 수 있는데, `--backend-name` 옵션을 사용하여, +
+$ sbt -v "test:runMain examples.Launcher GCD --backend-name verilator" 명령어로 실행하면 됩니다. +
+이 옵션은 TutorialRunner의 apply 함수에서 testOptionsManager.setBackendName(backend)로 전달되어 설정됩니다.
+Verilator 백엔드를 사용하면, verilog파일을 c++로 변환하고 시뮬레이션을 실행하고, VCD 파일을 생성할 수 있습니다.
+
+[[src:run-gcd-verilator-bash]]
+.Running GCD with Verilator backend
+[source,%nowrap,bash,linenums]
+----
+$ sbt -v "test:runMain examples.Launcher GCD --backend-name verilator"
+[sbt_options] declare -a sbt_options=()
+... 중략 ...
+[info] running examples.Launcher GCD --backend-name verilator
+Starting tutorial GCD
+[info] [0.004] Elaborating design...
+[info] [0.179] Done elaborating.
+... 중략 ...
+sim start on Note9 at Sun Sep  7 07:23:57 2025
+STARTING test_run_dir/examples/GCD/VGCD
+[info] [0.002] SEED 1757197413301
+Enabling waves..
+Exit Code: 0
+[info] [0.100] RAN 24 CYCLES PASSED
+Tutorials passing: 1
+[success] Total time: 29 s, completed Sep 7, 2025, 7:23:57 AM
+----
+
+위의 실행 결과로 부터 생성되는, VCD 파일이 `test_run_dir/examples/GCD/VGCD.vcd`에 생성됩니다.
+
+.test_run_dir/examples/GCD after running with Verilator backend
+image::test_run_dir_examples_GCD.png[]
+
+GTKWave와 같은 뷰어로, VCD열어서, 다음과 같이 시뮬레이션 결과를 확인할 수 있습니다.
+
+.GCD waveform
+image::test_run_dir_examples_GCD_waveform.png[]
+
