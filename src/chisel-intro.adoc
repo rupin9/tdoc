@@ -22,15 +22,75 @@ https://www.chisel-lang.org/docs/installation[Chisel 설치 가이드]를 참고
 chisel 개발 환경을 설정하기 위해서는, 다음의 소프트웨어를 설치해야 합니다.
 
 * Java Development Kit (JDK) 8 이상
++
+image::java-logo.png[width=80px, link=https://adoptium.net/installation/linux]
++
+Temurin JDK를 설치합니다
+```bash
+# root 계정으로 다음을 설치하기 (sudo로 해도 되지만, 각 pipe | 만날 때 마다, sudo 해두어야함)
+# Ensure the necessary packages are present:
+$ apt install -y wget gpg apt-transport-https
+
+# Download the Eclipse Adoptium GPG key:
+$ wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null
+
+# Configure the Eclipse Adoptium apt repository
+$ echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list
+
+# Update the apt packages
+$ apt update
+
+# Install
+$ apt install temurin-17-jdk
+
+# 본인 계정으로 돌아와서, JAVA_HOME 설정하기
+# .bashrc 에 다음과 같이 작성하기
+# .profile에 다른게 설정되어 있는지도 한번 확인해 보기
+export JAVA_HOME="/usr/lib/jvm/temurin-17-jdk-amd64/"
+```
 * Scala 2.12 이상
-* SBT (Scala Build Tool) 1.3 이상
++
+image::scala-spiral.png[width=80px, link=https://docs.scala-lang.org/getting-started/install-scala.html]
++
+Coursier를 이용하여 설치합니다.
+```bash
+$ curl -fL https://github.com/coursier/coursier/releases/latest/download/cs-x86_64-pc-linux.gz | gzip -d > cs && 
+chmod +x cs &&
+./cs setup
+
+# 위의 cs setup이 정상적으로 동작한다면, 아래 coursier는 실행할 필요가 없습니다.
+# 만약, cs 가 제대로 실행되지 않는 다면, coursier.jar를 실행해서 합니다.
+# From https://get-coursier.io/docs/cli-installation
+$ curl -fLo coursier https://github.com/coursier/launchers/raw/master/coursier &&
+    chmod +x coursier &&
+    ./coursier
+
+# set environment variable (.bashrc file)
+export PATH="$PATH:$HOME/.local/share/coursier/bin"
+
+# 설치후에 list 명령어로 확인합니다.
+$ cs list # 혹은 coursier list
+amm
+coursier
+cs
+sbt
+sbtn
+scala
+scalac
+scalafmt
+```
++
+만약, Scala 2가 기본 동작하도록 하려면, 다음과 같이 하면 됩니다.
+```bash
+$ cs install scala:2.13.16 scalac:2.13.16 # 혹은 coursier install scala:2.13.16 scalac:2.13.16
+```
+* SBT (Scala Build Tool) 1.3 이상: coursier를 통한 scala설치에서 함께 설치됨
 * firtool
 +
-image::circt-logo.svg[link=https://github.com/llvm/circt]
+image::circt-logo.svg[width=80px, link=https://github.com/llvm/circt]
 +
 https://github.com/llvm/circt[cirt] github repository에서 다운로드하여 설치합니다.
 직접 빌드해도 되지만, release 에서 미리 빌드된 바이너리를 다운로드하여 설치하는 것을 사용합니다.
-+
 ```bash
 # firtool-1.113.0 다운로드 및 설치
 $ wget https://github.com/llvm/circt/releases/download/firtool-1.113.0/circt-full-static-linux-x64.tar.gz
@@ -40,15 +100,13 @@ $ tar -xzvf [circt-full-static-linux-x64.tar.gz] -C [path to installation]
 export CHISEL_FIRTOOL_PATH=[path to installation]/firtool-1.113.0/bin
 export PATH=$CHISEL_FIRTOOL_PATH:$PATH
 ```
-
 * Verilator (optional, for Verilator backend)
 +
-image::verilator_256_200_min.png[link=https://verilator.org/guide/latest/install.html#git-quick-install]
+image::verilator_256_200_min.png[width=80px, link=https://verilator.org/guide/latest/install.html#git-quick-install]
 +
 https://verilator.org/guide/latest/install.html#git-quick-install[Verilator 설치 가이드]를 참고하여, Verilator를 설치합니다.
 설치가이드에 나와 있는 대로, 의존성 패키지 (prerequisites) 설치 포함하여, git clone 명령어로 소스코드를 다운로드한 후, 
 빌드 후, 적절한 버전 (여기서는 v5.012) 으로 설치합니다.
-+
 ```bash
 $ git checkout v5.012
 $ git switch -c v5.012

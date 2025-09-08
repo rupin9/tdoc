@@ -1,5 +1,5 @@
 [[study:chisel, Chisel study: https://github.com/ucb-bar/chisel-tutorial]]
-= My Chisel Study: Constructing Hardware in a Scala Embedded Language
+= My Chisel Study: Tutorial
 :stylesdir: ../docs-resources/themes
 //:stylesheet: asciidoctor-default.css
 :stylesheet: my-asciidoctor.css
