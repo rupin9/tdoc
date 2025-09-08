@@ -129,17 +129,20 @@ endmodule
 |===
 |Operation	|Result Bit Width
 
-|Z = X - Y	      |max(Width(X), Width(Y))
-|Z = X + Y	      |max(Width(X), Width(Y))
+|Z = X - Y or Z = X -% Y	      |max(Width(X), Width(Y))
+|Z = X -& Y	      |max(Width(X), Width(Y)) + 1
+|Z = X + Y or Z = X +% Y	      |max(Width(X), Width(Y))
+|Z = X +& Y	      |max(Width(X), Width(Y)) + 1
+|Z = X & Y	      |max(Width(X), Width(Y))
 |Z = X \| Y	      |max(Width(X), Width(Y))
 |Z = X ^ Y	      |max(Width(X), Width(Y))
 |Z = ~X	          |Width(X)
 |Z = Mux(C, X, Y)	|max(Width(X), Width (Y))
 |Z = X * Y	      |Width(X) + Width(Y)
-|Z = X << n	      |Width(X) + n
-|Z = X >> n	      |Width(X) - n
+|Z = X << n	      |Width(X) + maxNum(n)
+|Z = X >> n	      |Width(X) - minNum(n)
 |Z = Cat(X, Y)	  |Width(X) + Width(Y)
-|Z = Fill(n, x)	  |Width(X) + n
+|Z = Fill(n, x)	  |Width(X) * maxNum(n)
 |===
 
 === Bool class

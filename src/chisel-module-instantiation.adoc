@@ -95,6 +95,81 @@ Vec는 FullAdder와 같은 모듈 전체를 원소로 가질 수 없습니다. M
 따라서, 위은 adder4에서는 Vec를 사용하여 여러 개의 동일한 모듈 인스턴스를 만들고, 
 그 모듈들의 io 포트를 하나의 벡터로 묶습니다. 이 벡터는 다른 모듈과 연결하기 위한 '연결선들의 배열' 역할을 합니다.
 
+=== Memories
+
+Chisel에서, ROM (Read Only Memory) 은 VecInit을 이용하여 구현할 수 있습니다.
+다음은 n개의 entry를 가지는 sine lookup table을 ROM으로 구성한 예입니다.
+
+```scala
+val Pi = math.Pi
+def sinTable(amp: Double, n: Int) = {
+  val times =
+    (0 until n).map(i => (i*2*Pi)/(n.toDouble-1) - Pi)
+  val inits =
+    times.map(t => Math.round(amp * math.sin(t)).asSInt(32.W))
+  VecInit(inits)
+}
+```
+
+Read-Write 메모리는 기본적으로 2가지 경우로 나뉠 수 있습니다.
+
+. SyncReadMem: Sequential/synchronous-read, sequential/synchronous-write
+만약에, 동일한 클럭 엣지에서 같은 메모리 주소에 동기/순차 쓰기와 읽기를 동시에 수행하면, 
+읽힌 데이터의 값은 보장이 되지 않습니다. 즉, 읽은 값은 undefined 입니다.
+따라서, 동일한 클럭에서 같은 주소에 쓰기와 읽기 요청을 동시에 보내지 않도록 설계해야 합니다.
+
+. Mem: combinational/asynchronous-read, sequential/synchronous-write
+메모리 블록 자체는 데이터를 읽어온 후에도 그 값을 레지스터에 보관하는 기능을 갖고 있지 않습니다. 
+다음 클럭 사이클까지 값을 유지해야 한다면 외부 로직을 추가해야 합니다.
+
+SyncReadMem은 SRAM으로 합성되며, Mem은 register bank로 합성이 됩니다.
+아래에 구현 예를 나열하였다. 그래고, 아래의 코드에서 SyncReadMem 대신 Mem을 사용하면 비동기읽기가 된다.
+
+```scala
+import chisel3._
+
+// Read and write ports are separated.
+class ReadWriteSmem extends Module {
+  val width: Int = 32
+  val io = IO(new Bundle {
+    val enable = Input(Bool())
+    val write = Input(Bool())
+    val addr = Input(UInt(10.W))
+    val dataIn = Input(UInt(width.W))
+    val dataOut = Output(UInt(width.W))
+  })
+
+  val mem = SyncReadMem(1024, UInt(width.W))
+  // Create one write port and one read port
+  mem.write(io.addr, io.dataIn)
+  io.dataOut := mem.read(io.addr, io.enable)
+}
+
+// Read and write port can be shared when r/w is mutulally exclusive.
+class RWSmem extends Module {
+  val width: Int = 32
+  val io = IO(new Bundle {
+    val enable = Input(Bool())
+    val write = Input(Bool())
+    val addr = Input(UInt(10.W))
+    val dataIn = Input(UInt(width.W))
+    val dataOut = Output(UInt(width.W))
+  })
+
+  val mem = SyncReadMem(1024, UInt(width.W))
+  io.dataOut := DontCare
+  when(io.enable) {
+    val rdwrPort = mem(io.addr)
+    when (io.write) { rdwrPort := io.dataIn }
+      .otherwise    { io.dataOut := rdwrPort }
+  }
+
+  // Another implementation using readWrite method
+  // val mem = SyncReadMem(1024, UInt(width.W))
+  // io.dataOut := mem.readWrite(io.addr, io.dataIn, io.enable, io.write)
+}
+```
+
 === Parameterized Module
 
 Vec 클래스를 활용하여, 파라미터화된 모듈을 구현할 수 있습니다. <<parameterized-module>> 예제를 참조하시기 바랍니다.
@@ -146,7 +221,7 @@ val adder16 = Module(new Adder(n=16)) // 16-bit adder
 
 === Builtin Primitive
 
-Reg, Unit, Wire, IO, Module, Vec, Bundle 등은 chisel에서 제공하는 빌트인 프리미티브입니다.
+Reg, Unit, Wire, IO, Module, Vec, Bundle, Mem 등은 chisel에서 제공하는 빌트인 프리미티브입니다.
 이 외에도, chisel에서 제공하는 여러 가지 빌트인 프리미티브가 있습니다.
 다음은 그 중에서 자주 사용되는 것들입니다.
 ```scala
