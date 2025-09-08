@@ -66,6 +66,8 @@ _This document is a study note during my exploring chisel (Constructing Hardware
 
 include::chisel-intro.adoc[]
 include::chisel-basics.adoc[]
+include::chisel-types-operations.adoc[]
+include::chisel-module-instantiation.adoc[]
 //Appendices for Vector
 //include::vector-examples.adoc[]
 //include::fraclmul.adoc[]

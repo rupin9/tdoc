@@ -36,7 +36,7 @@ examples, problems, solutions 디렉토리가 각각 pair로 있다.
 GCD.scala 예제를 실행을 통하여, chisel-tutorial 의 전반적인 활용에 대해서 간단히 알아본다.
 
 .GDC.scala
-[source,%nowrap,scala,linenums]
+[source,scala,%nowrap,linenums]
 ----
 package examples
 import chisel3._
@@ -167,7 +167,7 @@ io.out 포트에는 x 레지스터의 값을 할당하고, io.valid 포트에는
 
 [[src:gcd-tests-scala]]
 .GCDTests.scala
-[source,%nowrap,scala,linenums]
+[source,scala,%nowrap,linenums]
 ----
 package examples
 
@@ -222,7 +222,7 @@ Driver 함수는 첫 번째 인자로 test 대상 (여기서는 GCD) 이 되는 
 
 [[src:run-gcd-bash]]
 .Running GCD
-[source,%nowrap,bash,linenums]
+[source,bash,%nowrap,linenums]
 ----
 $ sbt -v "test:runMain examples.Launcher GCD"
 ... 중략 ...
@@ -249,7 +249,7 @@ TutorialRunner 객체의 apply 함수는 첫 번째 인자로 섹션 이름 (여
 
 [[src:launcher-scala]]
 .Launcher.scala and TutorialRunner.scala
-[source,%nowrap,scala,linenums]
+[source,scala,%nowrap,linenums]
 ----
 // @chisel-tutorial/src/test/scala/examples/Launcher.scala
 package examples
@@ -336,7 +336,7 @@ Verilator 백엔드를 사용하면, verilog파일을 c++로 변환하고 시뮬
 
 [[src:run-gcd-verilator-bash]]
 .Running GCD with Verilator backend
-[source,%nowrap,bash,linenums]
+[source,bash,%nowrap,linenums]
 ----
 $ sbt -v "test:runMain examples.Launcher GCD --backend-name verilator"
 [sbt_options] declare -a sbt_options=()
